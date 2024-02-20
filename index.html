@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Page Scroll</title>
+    <style>
+        /* CSS styles */
+        /* Import fonts */
+        @import url(https://fonts.googleapis.com/css?family=Carter+One);
+        
+        /* Hide radio buttons */
+        input[type=radio] {
+            display: none;
+        }
+        
+        /* Navigation styling */
+        .nav {
+            position: fixed;
+            z-index: 2;
+            left: 56%;
+            bottom: 390px;
+            transform: translateX(-50%);
+        }
+        
+        .nav__item {
+            width: 12px;
+            height: 12px;
+            display: block;
+            margin: 12px auto;
+            border: solid 2px rgb(234, 249, 159);
+            border-radius: 50%;
+            cursor: pointer;
+            
+        }
+        
+        .nav__item:hover {
+            background-color: rgb(150, 26, 26);
+        }
+        
+        /* Scroll down arrow styling */
+        .scroll-down-arrow {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            cursor: pointer;
+            animation: bounce 2s infinite;
+        }
+        
+        /* Animation for scroll down arrow */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        /* Set height of body and HTML to 100% */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "Carter One", cursive;
+            color: white;
+            overflow: hidden;
+        }
+        
+        /* Style for heading */
+        h1 {
+            font-size: em;
+            text-align: center;
+        }
+        
+        /* Style for section container */
+        .section-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        /* Style for each section */
+        .section {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+        
+        /* Background colors for each section */
+        .section:nth-child(odd) {
+            background-color: #f8b195;
+        }
+        
+        .section:nth-child(even) {
+            background-color: #c06c85;
+        }
+
+        /* Media query for mobile devices */
+        @media only screen and (max-width: 768px) {
+            .nav {
+                left: 50%;
+                bottom: 20px;
+                transform: translateX(-50%);
+            }
+            .nav__item {
+                display: inline-block;
+                margin: 0 5px; /* Adjust margin as needed */
+            }
+        }
+
+    </style>
+</head>
+
+<body translate="no">
+    <!-- Inputs for radio buttons -->
+    <input type="radio" name="item" value="1" id="section1" checked="checked" />
+    <input type="radio" name="item" value="2" id="section2" />
+    <input type="radio" name="item" value="3" id="section3" />
+    <input type="radio" name="item" value="4" id="section4" />
+    <input type="radio" name="item" value="5" id="section5" />
+    <input type="radio" name="item" value="6" id="section6" />
+    <input type="radio" name="item" value="7" id="section7" />
+    
+    <!-- Section container -->
+    <div class="section-container">
+        <!-- Sections will be dynamically loaded here -->
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <label class="nav__item" for="section1"></label>
+        <label class="nav__item" for="section2"></label>
+        <label class="nav__item" for="section3"></label>
+        <label class="nav__item" for="section4"></label>
+        <label class="nav__item" for="section5"></label>
+        <label class="nav__item" for="section6"></label>
+        <label class="nav__item" for="section7"></label>
+    </nav>
+    
+    <!-- Scroll down arrow -->
+    <div class="scroll-down-arrow" onclick="scrollToNextSection()">
+        &#9660;
+    </div>
+
+   
+
+    <script>
+        // Function to load c3ontent of selected page into section container
+        function loadContent(page) {
+            // Create a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
+            // Specify the HTTP method and URL of the page to be loaded
+            xhr.open('GET', 'example' + page + '.html', true);
+            // Define what happens on successful data submission
+            xhr.onload = function () {
+                // Check if the request was successful
+                if (xhr.status === 200) {
+                    // Set the HTML content of the section container to the response
+                    document.querySelector('.section-container').innerHTML = xhr.responseText;
+                }
+            };
+            // Send the request
+            xhr.send();
+        }
+        
+        // Get all radio buttons
+        var radios = document.querySelectorAll('input[type="radio"]');
+        
+        // Add event listener to each radio button
+        radios.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                // Get the value of the selected radio button
+                var selectedPage = this.value;
+                // Load the content of the selected page into the section container
+                loadContent(selectedPage);
+            });
+        });
+
+        // Function to scroll to the next section/page
+        function scrollToNextSection() {
+            // Get the checked radio button
+            var checkedRadio = document.querySelector('input[name="item"]:checked');
+            // Get the next sibling radio button
+            var nextRadio = checkedRadio.nextElementSibling;
+            // If there is a next radio button, check it to navigate to the next section
+            if (nextRadio) {
+                nextRadio.checked = true;
+                // Load the content of the next section
+                loadContent(nextRadio.value);
+            }
+        }
+
+        // Function to mark the current section's radio button as checked
+        function markCurrentSection() {
+            var sections = document.querySelectorAll('.section');
+            var radioButtons = document.querySelectorAll('input[type="radio"]');
+            var currentSectionIndex = null;
+            // Loop through all sections to find the current section
+            sections.forEach(function(section, index) {
+                var rect = section.getBoundingClientRect();
+                // If the top of the section is in the viewport, consider it as the current section
+                if (rect.top >= 0 && rect.top <= window.innerHeight) {
+                    currentSectionIndex = index;
+                }
+            });
+            // If the current section index is found, mark its corresponding radio button as checked
+            if (currentSectionIndex !== null) {
+                radioButtons[currentSectionIndex].checked = true;
+            }
+        }
+
+        // Load the content of the initially selected page
+        loadContent(document.querySelector('input[name="item"]:checked').value);
+
+        // Add event listener to window scroll event to mark the current section's radio button as checked
+        window.addEventListener('scroll', markCurrentSection);
+    </script>
+</body>
+
+</html>
